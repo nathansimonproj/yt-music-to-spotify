@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Playlist - YouTube Music Migrator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .playlist-item {
+            margin: 10px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fafafa;
+        }
+        .playlist-item:hover {
+            background-color: #f0f0f0;
+        }
+        input[type="radio"] {
+            margin-right: 10px;
+        }
+        label {
+            cursor: pointer;
+            font-size: 16px;
+            display: block;
+        }
+        button {
+            background-color: #1db954;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #1ed760;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .playlist-count {
+            color: #666;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Select a Playlist to Migrate</h1>
+        <p class="playlist-count">{{ playlists|length }} playlist(s) found</p>
+        
+        <form method="POST">
+            {% for pl in playlists %}
+                <div class="playlist-item">
+                    <label>
+                        <input type="radio" name="playlist" value='{"id": "{{ pl["playlistId"] }}", "title": "{{ pl["title"] }}"}' required>
+                        <strong>{{ pl['title'] }}</strong>
+                        {% if pl.get('artist') %}
+                            <br><span style="color: #666;">by {{ pl['artist'] }}</span>
+                        {% endif %}
+                    </label>
+                </div>
+            {% endfor %}
+            
+            <button type="submit" {% if not playlists %}disabled{% endif %}>
+                {% if playlists %}Continue to Spotify{% else %}No playlists found{% endif %}
+            </button>
+        </form>
+        
+        {% if not playlists %}
+            <p style="text-align: center; color: #666; margin-top: 20px;">
+                No playlists found. Please check your YouTube Music user ID and try again.
+                <br><a href="/">Go back</a>
+            </p>
+        {% endif %}
+    </div>
+</body>
+</html>

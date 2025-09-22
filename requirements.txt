@@ -1,0 +1,11 @@
+# Core web framework
+Flask==2.3.3
+
+# HTTP requests
+requests==2.31.0
+
+# Environment variables
+python-dotenv==1.0.0
+
+# YouTube Music API
+ytmusicapi==1.4.0
