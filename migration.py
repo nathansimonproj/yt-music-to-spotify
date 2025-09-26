@@ -13,6 +13,7 @@ import requests
 from flask import Flask, request, redirect, session, url_for, render_template
 from ytmusicapi import YTMusic
 from dotenv import load_dotenv
+import json
 
 
 # Load environment variables
@@ -90,7 +91,8 @@ def pull_youtube_playlist():
         if request.method == "POST":
             selected = request.form.get("playlist")
             if selected:
-                session['yt_playlist_id'] = selected
+                playlist_info = json.loads(selected)
+                session['yt_playlist_info'] = playlist_info
                 return redirect(url_for("store_playlist"))
 
         return render_template("playlists.html", playlists=playlists)
@@ -100,16 +102,15 @@ def pull_youtube_playlist():
 @app.route("/store_playlist")
 def store_playlist():
     """Extract tracks from selected YouTube Music playlist."""
-    if 'yt_playlist_id' not in session:
+    if 'yt_playlist_info' not in session:
         return redirect(url_for('pull_youtube_playlist'))
     
     try:
-        playlist_id = session.get('yt_playlist_id')
+        playlist_id = session.get('yt_playlist_info')['id']
+        playlist_title = session.get('yt_playlist_info')['title']
         playlist = ytmusic.get_playlist(playlist_id)['tracks']
-        
-        # Clear previous song list
         song_list.clear()
-        
+
         for song in playlist:
             if song.get('title') and song.get('artists'):
                 track_info = {
@@ -121,6 +122,12 @@ def store_playlist():
         return redirect(url_for('spotify'))
     except Exception as e:
         return f"Error extracting playlist: {str(e)} <a href='/pull_youtube_playlist'>Go back</a>"
+
+
+    except Exception as e:
+        print(e)
+
+
 
 
 @app.route("/spotify")
@@ -215,7 +222,9 @@ def profile():
 @app.route("/search_tracks", methods=["POST", "GET"])
 def search_tracks():
     """Create Spotify playlist and migrate tracks from YouTube Music."""
+
     access_token = session.get("access_token")
+
     if not access_token:
         return redirect(url_for("login"))
     
@@ -227,7 +236,10 @@ def search_tracks():
         spotify_user_id = session['spotify_user_id']
         playlist_endpoint = f"{SPOTIFY_API_URL}/users/{spotify_user_id}/playlists"
 
-        playlist_name = ytmusic.get_playlist(session.get('yt_playlist_id'))['title']
+        try:
+            playlist_name = session.get('yt_playlist_info')['title']
+        except Exception as e:
+            print(f"failed {e}")
 
         payload = {
             "name": playlist_name,
