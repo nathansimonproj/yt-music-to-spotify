@@ -107,11 +107,11 @@ def store_playlist():
     
     try:
         playlist_id = session.get('yt_playlist_info')['id']
-        playlist_title = session.get('yt_playlist_info')['title']
-        playlist = ytmusic.get_playlist(playlist_id)['tracks']
+        playlist_songs = ytmusic.get_playlist(playlist_id)['tracks']
+
         song_list.clear()
 
-        for song in playlist:
+        for song in playlist_songs:
             if song.get('title') and song.get('artists'):
                 track_info = {
                     'title': song['title'],
@@ -252,8 +252,8 @@ def search_tracks():
                 f"{response.text} <a href='/login'>Try again</a>"
             )
 
-        playlist_id = response.json()['id']
-        session['playlist_id'] = playlist_id
+        spotify_playlist_id = response.json()['id']
+        session['spotify_playlist_id'] = spotify_playlist_id
 
         # Search for tracks and collect Spotify URIs
         spotify_song_ids = []
@@ -298,7 +298,7 @@ def search_tracks():
                 batch_payload = {"uris": batch}
 
                 add_response = requests.post(
-                    f"https://api.spotify.com/v1/playlists/{playlist_id}/tracks",
+                    f"https://api.spotify.com/v1/playlists/{spotify_playlist_id}/tracks",
                     headers=SPOTIFY_HEADERS["AUTH_CONTENT_TYPE"],
                     json=batch_payload,
                     timeout=10
