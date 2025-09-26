@@ -124,12 +124,6 @@ def store_playlist():
         return f"Error extracting playlist: {str(e)} <a href='/pull_youtube_playlist'>Go back</a>"
 
 
-    except Exception as e:
-        print(e)
-
-
-
-
 @app.route("/spotify")
 def spotify():
     """Redirect to Spotify login."""
@@ -222,9 +216,7 @@ def profile():
 @app.route("/search_tracks", methods=["POST", "GET"])
 def search_tracks():
     """Create Spotify playlist and migrate tracks from YouTube Music."""
-
     access_token = session.get("access_token")
-
     if not access_token:
         return redirect(url_for("login"))
     
@@ -238,12 +230,12 @@ def search_tracks():
 
         try:
             playlist_name = session.get('yt_playlist_info')['title']
-        except Exception as e:
-            print(f"failed {e}")
+        except Exception:
+            playlist_name = "YouTube Music Migration"
 
         payload = {
             "name": playlist_name,
-            "description": "Playlist migrated from YouTube Music",
+            "description": f"Migrated from YouTube Music: {playlist_name}",
             "public": False
         }
 
